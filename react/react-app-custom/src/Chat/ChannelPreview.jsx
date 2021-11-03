@@ -11,9 +11,8 @@ import {sendBirdSelectors, withSendBird} from "sendbird-uikit";
 const Status = (props) => {
     console.log('Stastus props', props);
     const {members, sdk} = props;
-    const membersStr = members.map(c => c.nickname || c.userId).join(', ');
-
-
+    const otherMember = members.find(c => c.userId !== sdk.getCurrentUserId())
+    // const membersStr = members.map(c => c.nickname || c.userId).join(', ');
 
     useEffect(() => {
         let timer = null;
@@ -52,7 +51,11 @@ const Status = (props) => {
         };
     }, []);
 
-    return <div>Status: {membersStr}</div>
+    const status = otherMember.connectionStatus === sdk.User.ONLINE
+        ? (<div style={{backgroundColor: 'green'}}>Online</div>)
+        : (<div style={{backgroundColor: 'grey'}}>Offline</div>)
+
+    return status
 };
 
 const StatusWithSendbird = withSendBird(Status, (state) => {
@@ -61,44 +64,54 @@ const StatusWithSendbird = withSendBird(Status, (state) => {
     return {sdk};
 })
 
-export default function ChannelPreview({ channel, onLeaveChannel }) {
-  return (
-    <Paper variant="outlined" style={{ display: 'flex' }}>
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
-        <CardContent style={{ flex: '1 0 auto', minWidth: 180 }}>
-          <Typography component="h5" variant="h5">
-            {channel.name
-             || channel.members.map(c => c.nickname || c.userId).join(', ').slice(0, 10).concat('...')
-            }
-          </Typography>
-            <StatusWithSendbird members={channel.members} />
-        </CardContent>
-        <div className={{
-          display: 'flex',
-          alignItems: 'center',
-        }}>
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={() => onLeaveChannel(channel, () => {
-              alert(`Left channel: ${channel.url}`)
-            })}
-          >
-            Leave
-          </Button>
-        </div>
-      </div>
-      <CardMedia
-        image={
-          channel.coverUrl
-          || channel.members[0].profileUrl
-        }
-        style={{ width: 151 }}
-        title={channel.url}
-      />
-    </Paper>
-  )
-}
+let ChannelPreview = function ({ channel, onLeaveChannel, sdk }) {
+    // const context = useSendBirdStateContext();
+    // const sdk = sendBirdSelectors.getSdk(state)
+
+    let otherMember = channel.members.find(member => member.userId !== sdk.getCurrentUserId());
+    const channelName = otherMember.nickname;
+
+    return (
+        <Paper variant="outlined" style={{ display: 'flex' }}>
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+            }}>
+                <CardContent style={{ flex: '1 0 auto', minWidth: 180 }}>
+                    <Typography component="h5" variant="h5">
+                        {channelName}
+                    </Typography>
+                    <StatusWithSendbird members={channel.members} />
+                </CardContent>
+                <div className={{
+                    display: 'flex',
+                    alignItems: 'center',
+                }}>
+                    <Button
+                        variant="outlined"
+                        color="secondary"
+                        onClick={() => onLeaveChannel(channel, () => {
+                            alert(`Left channel: ${channel.url}`)
+                        })}
+                    >
+                        Leave
+                    </Button>
+                </div>
+            </div>
+            <CardMedia
+                image={
+                    channel.coverUrl
+                    || channel.members[0].profileUrl
+                }
+                style={{ width: 151 }}
+                title={channel.url}
+            />
+        </Paper>
+    )
+};
+
+export default withSendBird(ChannelPreview, (state) => {
+    const sdk = sendBirdSelectors.getSdk(state)
+
+    return {sdk};
+})
