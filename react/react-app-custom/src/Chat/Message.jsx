@@ -10,11 +10,12 @@ import Link from '@material-ui/core/Link';
 // import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 
 export default function Message({ message, onDeleteMessage, onUpdateMessage }) {
+    // console.log('message', message);
   return (
     <Paper style={{ display: 'flex' }}>
       <CardMedia
         image={
-          message.sender && message.sender.profileUrl
+          message.sender ? message.sender.profileUrl : 'https://picsum.photos/50/50'
         }
         style={{ width: 50, height: 50, marginTop: 25 }}
       />

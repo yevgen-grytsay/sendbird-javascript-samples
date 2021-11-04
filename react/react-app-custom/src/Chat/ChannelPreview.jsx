@@ -5,13 +5,17 @@ import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
-import {sendBirdSelectors, withSendBird} from "sendbird-uikit";
+import {sendBirdSelectors, useSendbirdStateContext} from "sendbird-uikit";
 
 
 const Status = (props) => {
-    console.log('Stastus props', props);
-    const {members, sdk} = props;
-    const otherMember = members.find(c => c.userId !== sdk.getCurrentUserId())
+    console.log('Status props', props);
+    const {members} = props;
+
+    const context = useSendbirdStateContext()
+    const sdk = sendBirdSelectors.getSdk(context)
+
+    const otherMember = members.find(c => c.userId !== sdk.currentUser.userId)
     // const membersStr = members.map(c => c.nickname || c.userId).join(', ');
 
     useEffect(() => {
@@ -33,7 +37,7 @@ const Status = (props) => {
                 // console.log('listQuery online', error);
             }
 
-            const otherMembers = users.filter(u => u.userId !== sdk.getCurrentUserId());
+            const otherMembers = users.filter(u => u.userId !== sdk.currentUser.userId);
             console.log('other members status', {[otherMembers[0].nickname]: otherMembers[0].connectionStatus});
 
 
@@ -58,17 +62,17 @@ const Status = (props) => {
     return status
 };
 
-const StatusWithSendbird = withSendBird(Status, (state) => {
-    const sdk = sendBirdSelectors.getSdk(state)
+// const StatusWithSendbird = withSendBird(Status, (state) => {
+//     const sdk = sendBirdSelectors.getSdk(state)
+//
+//     return {sdk};
+// })
 
-    return {sdk};
-})
+const ChannelPreview = function ({ channel, onLeaveChannel }) {
+    const context = useSendbirdStateContext()
+    const sdk = sendBirdSelectors.getSdk(context)
 
-let ChannelPreview = function ({ channel, onLeaveChannel, sdk }) {
-    // const context = useSendBirdStateContext();
-    // const sdk = sendBirdSelectors.getSdk(state)
-
-    let otherMember = channel.members.find(member => member.userId !== sdk.getCurrentUserId());
+    let otherMember = channel.members.find(member => member.userId !== sdk.currentUser.userId);
     const channelName = otherMember.nickname;
 
     return (
@@ -81,7 +85,7 @@ let ChannelPreview = function ({ channel, onLeaveChannel, sdk }) {
                     <Typography component="h5" variant="h5">
                         {channelName}
                     </Typography>
-                    <StatusWithSendbird members={channel.members} />
+                    <Status members={channel.members} />
                 </CardContent>
                 <div className={{
                     display: 'flex',
@@ -110,8 +114,5 @@ let ChannelPreview = function ({ channel, onLeaveChannel, sdk }) {
     )
 };
 
-export default withSendBird(ChannelPreview, (state) => {
-    const sdk = sendBirdSelectors.getSdk(state)
 
-    return {sdk};
-})
+export default ChannelPreview;
