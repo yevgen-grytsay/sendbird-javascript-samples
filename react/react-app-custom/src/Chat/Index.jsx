@@ -13,6 +13,7 @@ import 'sendbird-uikit/dist/index.css';
 import ChannelPreview from './ChannelPreview';
 import Message from './Message';
 import getCustomPaginatedQuery from './CustomUserList';
+import {ZodianicApp} from './Zodianic';
 
 export default function Chat({ userId, theme, nickname, useCustomQuery }) {
   const history = useHistory();
@@ -37,6 +38,7 @@ export default function Chat({ userId, theme, nickname, useCustomQuery }) {
             : null
         }
       >
+        <ZodianicApp>
         <div className="sendbird-app__wrap">
           <div className="sendbird-app__channellist-wrap">
             <ChannelList
@@ -64,6 +66,7 @@ export default function Chat({ userId, theme, nickname, useCustomQuery }) {
             />
           </div>
         )}
+        </ZodianicApp>
       </SendBirdProvider>
     </div>
   )

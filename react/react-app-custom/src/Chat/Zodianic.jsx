@@ -8,14 +8,16 @@ export const ZodianicDispatch = React.createContext(null);
 const reducer = function (state, action) {
     switch (action.type) {
         case 'add':
+
+            const newIds = state.subscribeToIds;
+            if (!newIds.includes(action.payload.userId)) {
+                newIds.push(action.payload.userId);
+            }
+            console.log('add action', action, newIds);
+
             return {
                 ...state,
-                subscribeToIds: [
-                    ...state.users
-                        .filter(u => u.userId !== action.payload.userId)
-                        .map(u => u.userId),
-                    action.payload.userId,
-                ]
+                subscribeToIds: newIds
                 // users: [
                 //     ...state.users.filter(u => u.userId !== action.payload.userId),
                 //     action.payload,
@@ -27,6 +29,11 @@ const reducer = function (state, action) {
                 subscribeToIds: state.users
                     .filter(u => u.userId !== action.payload.userId)
                     .map(u => u.userId),
+            };
+        case 'replace_users':
+            return {
+                ...state,
+                users: action.payload,
             };
         default:
             throw new Error();
@@ -42,54 +49,53 @@ export const ZodianicApp = ({children}) => {
         }
     );
 
-    // const context = useSendbirdStateContext()
-    // const sdk = sendBirdSelectors.getSdk(context)
+    // useEffect(() => {
+    //     console.log('user list updated', store.users);
+    // }, [store.users]);
+    const context = useSendbirdStateContext()
+    const sdk = sendBirdSelectors.getSdk(context)
 
     useEffect(() => {
-        console.log('user list updated', store.users);
-    }, [store.users]);
+        let timer = setInterval(() => {
+            console.log('sdk', sdk);
 
-    // useEffect(() => {
-    //     let timer = null;
-    //     const listQuery = sdk.createApplicationUserListQuery();
-    //     // listQuery.userIdsFilter = ['Jeff'];
-    //     listQuery.userIdsFilter = userList.map(c => c.userId);
-    //     let onComplete = function(users, error) {
-    //         if (error) {
-    //             console.log('listQuery error', error);
-    //             // Handle error.
-    //         }
-    //
-    //         // users[0] = 'Jeff'
-    //         // console.log('listQuery ok', users);
-    //         if (users[0].connectionStatus === sdk.User.ONLINE) {
-    //             // 'Jeff' is currently online.
-    //             // User.connectionStatus consists of NON_AVAILABLE, ONLINE, and OFFLINE.
-    //             // console.log('listQuery online', error);
-    //         }
-    //
-    //         const otherMembers = users.filter(u => u.userId !== sdk.currentUser.userId);
-    //         console.log('other members status', {[otherMembers[0].nickname]: otherMembers[0].connectionStatus});
-    //
-    //
-    //         timer = setTimeout(() => {
-    //             const listQuery = sdk.createApplicationUserListQuery();
-    //             // listQuery.userIdsFilter = ['Jeff'];
-    //             listQuery.userIdsFilter = userList.map(c => c.userId);
-    //             listQuery.next(onComplete);
-    //         }, 5000);
-    //     };
-    //     listQuery.next(onComplete);
-    //
-    //     return function () {
-    //         clearTimeout(timer);
-    //     };
-    // }, []);
+            if (!sdk || !sdk.createApplicationUserListQuery) {
+                console.warn('sdk not initialized');
+
+                return;
+            }
+
+            if (store.subscribeToIds.length === 0) {
+                console.warn('no users registered to track');
+
+                return;
+            }
+
+
+            console.warn('users registered to track: ', store.subscribeToIds);
+
+            const listQuery = sdk.createApplicationUserListQuery();
+            listQuery.userIdsFilter = store.subscribeToIds;
+            listQuery.next(function (users, error) {
+                if (error) {
+                    console.log('listQuery error', error);
+                    // Handle error.
+                } else {
+                    console.log('listQuery ok', users);
+                    dispatch({type: 'replace_users', payload: users})
+                }
+            });
+
+        }, 10000);
+
+        return function () {
+            clearInterval(timer);
+        };
+    }, [sdk]);
 
     return (
         <ZodianicDispatch.Provider value={{dispatch, userList: store.users}}>
             {children}
         </ZodianicDispatch.Provider>
     );
-//  const dispatch = useContext(ZodianicDispatch);
 };

@@ -10,7 +10,7 @@ import {ZodianicDispatch} from "./Zodianic";
 
 
 const Status = (props) => {
-    console.log('Status props', props);
+    // console.log('Status props', props);
     const {members} = props;
 
     const context = useSendbirdStateContext()
@@ -22,6 +22,7 @@ const Status = (props) => {
     const {dispatch, userList} = useContext(ZodianicDispatch);
 
     useEffect(() => {
+        console.log('register user', otherMember);
         dispatch({type: 'add', payload: otherMember});
     }, []);
 
@@ -66,7 +67,7 @@ const Status = (props) => {
     const thisUser = userList.find(u => u.userId === otherMember.userId);
     useEffect(() => {
         if (!thisUser) {
-            console.warn('user not found', {
+            console.log('user not found', {
                 userList,
                 otherMember
             })
@@ -128,6 +129,7 @@ const ChannelPreview = function ({ channel, onLeaveChannel }) {
                 image={
                     channel.coverUrl
                     || channel.members[0].profileUrl
+                    || 'https://picsum.photos/50/50'
                 }
                 style={{ width: 151 }}
                 title={channel.url}

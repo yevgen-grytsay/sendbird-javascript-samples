@@ -9,13 +9,13 @@ import {
 
 import Login from './Login';
 import Chat from './Chat/Index';
-import {ZodianicApp} from "./Chat/Zodianic";
+// import {ZodianicApp} from "./Chat/Zodianic";
 
 function App() {
   const [config, setconfig] = useState({});
   return (
     <div className="App">
-      <ZodianicApp>
+
         <Router>
           <Switch>
             <Route path="/chat">
@@ -31,7 +31,7 @@ function App() {
             </Route>
           </Switch>
         </Router>
-      </ZodianicApp>
+
     </div>
   );
 }
