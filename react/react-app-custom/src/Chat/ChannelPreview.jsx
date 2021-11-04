@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useContext, useState} from 'react';
 
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
@@ -6,6 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import {sendBirdSelectors, useSendbirdStateContext} from "sendbird-uikit";
+import {ZodianicDispatch} from "./Zodianic";
 
 
 const Status = (props) => {
@@ -18,44 +19,65 @@ const Status = (props) => {
     const otherMember = members.find(c => c.userId !== sdk.currentUser.userId)
     // const membersStr = members.map(c => c.nickname || c.userId).join(', ');
 
+    const {dispatch, userList} = useContext(ZodianicDispatch);
+
     useEffect(() => {
-        let timer = null;
-        const listQuery = sdk.createApplicationUserListQuery();
-        // listQuery.userIdsFilter = ['Jeff'];
-        listQuery.userIdsFilter = members.map(c => c.userId);
-        let onComplete = function(users, error) {
-            if (error) {
-                console.log('listQuery error', error);
-                // Handle error.
-            }
-
-            // users[0] = 'Jeff'
-            // console.log('listQuery ok', users);
-            if (users[0].connectionStatus === sdk.User.ONLINE) {
-                // 'Jeff' is currently online.
-                // User.connectionStatus consists of NON_AVAILABLE, ONLINE, and OFFLINE.
-                // console.log('listQuery online', error);
-            }
-
-            const otherMembers = users.filter(u => u.userId !== sdk.currentUser.userId);
-            console.log('other members status', {[otherMembers[0].nickname]: otherMembers[0].connectionStatus});
-
-
-            timer = setTimeout(() => {
-                const listQuery = sdk.createApplicationUserListQuery();
-                // listQuery.userIdsFilter = ['Jeff'];
-                listQuery.userIdsFilter = members.map(c => c.userId);
-                listQuery.next(onComplete);
-            }, 5000);
-        };
-        listQuery.next(onComplete);
-
-        return function () {
-            clearTimeout(timer);
-        };
+        dispatch({type: 'add', payload: otherMember});
     }, []);
 
-    const status = otherMember.connectionStatus === sdk.User.ONLINE
+    // useEffect(() => {
+    //     let timer = null;
+    //     const listQuery = sdk.createApplicationUserListQuery();
+    //     // listQuery.userIdsFilter = ['Jeff'];
+    //     listQuery.userIdsFilter = members.map(c => c.userId);
+    //     let onComplete = function(users, error) {
+    //         if (error) {
+    //             console.log('listQuery error', error);
+    //             // Handle error.
+    //         }
+    //
+    //         // users[0] = 'Jeff'
+    //         // console.log('listQuery ok', users);
+    //         if (users[0].connectionStatus === sdk.User.ONLINE) {
+    //             // 'Jeff' is currently online.
+    //             // User.connectionStatus consists of NON_AVAILABLE, ONLINE, and OFFLINE.
+    //             // console.log('listQuery online', error);
+    //         }
+    //
+    //         const otherMembers = users.filter(u => u.userId !== sdk.currentUser.userId);
+    //         console.log('other members status', {[otherMembers[0].nickname]: otherMembers[0].connectionStatus});
+    //
+    //
+    //         timer = setTimeout(() => {
+    //             const listQuery = sdk.createApplicationUserListQuery();
+    //             // listQuery.userIdsFilter = ['Jeff'];
+    //             listQuery.userIdsFilter = members.map(c => c.userId);
+    //             listQuery.next(onComplete);
+    //         }, 5000);
+    //     };
+    //     listQuery.next(onComplete);
+    //
+    //     return function () {
+    //         clearTimeout(timer);
+    //     };
+    // }, []);
+
+    const [isOnline, setOnline] = useState(false);
+    const thisUser = userList.find(u => u.userId === otherMember.userId);
+    useEffect(() => {
+        if (!thisUser) {
+            console.warn('user not found', {
+                userList,
+                otherMember
+            })
+
+            return;
+        }
+
+        setOnline(thisUser.connectionStatus === sdk.User.ONLINE)
+    }, [thisUser]);
+
+    const status = isOnline
         ? (<div style={{backgroundColor: 'green'}}>Online</div>)
         : (<div style={{backgroundColor: 'grey'}}>Offline</div>)
 
