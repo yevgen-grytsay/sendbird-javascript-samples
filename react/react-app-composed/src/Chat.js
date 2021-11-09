@@ -5,11 +5,12 @@ import './Chat.css';
 import { useHistory } from "react-router-dom";
 import {
   SendBirdProvider,
-  ChannelList,
   Channel,
   ChannelSettings,
 } from 'sendbird-uikit';
 import 'sendbird-uikit/dist/index.css';
+import ChannelList from "./components/ChannelList";
+
 
 export default function Chat({ userId, nickname, theme }) {
   const history = useHistory();
