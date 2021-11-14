@@ -9,6 +9,7 @@ import {
 
 import Login from './Login';
 import Chat from './Chat';
+import ChatApp from '../src/components/App';
 
 function App() {
   const [config, setconfig] = useState({});
@@ -17,7 +18,8 @@ function App() {
       <Router>
         <Switch>
           <Route path="/chat">
-            <Chat
+            <ChatApp
+                appId={process.env.APP_ID}
               userId={config.userId}
               nickname={config.nickname}
               theme={config.theme}

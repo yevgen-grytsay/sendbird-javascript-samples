@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useReducer } from 'react';
 import PropTypes from 'prop-types';
 
-import {withSendBird} from "sendbird-uikit";
+import withSendbirdContext from "../../lib/SendbirdSdkContext";
 // import * as userActions from '../../lib/dux/user/actionTypes';
 // import { UserProfileProvider } from '../../lib/UserProfileContext';
 
@@ -151,7 +151,7 @@ function ChannelList(props) {
         <ChannelHeader
           renderHeader={renderHeader}
           user={user}
-          onEdit={null}
+          onEdit={() => {}}
         />
       </div>
       <div
@@ -363,4 +363,4 @@ ChannelList.defaultProps = {
   onChannelSelect: noop,
 };
 
-export default withSendBird(ChannelList);
+export default withSendbirdContext(ChannelList);
