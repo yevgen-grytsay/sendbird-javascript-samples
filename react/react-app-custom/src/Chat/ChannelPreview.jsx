@@ -4,7 +4,8 @@ import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import {sendBirdSelectors, useSendbirdStateContext} from "sendbird-uikit";
-import Status from './Status';
+// import Status from './Status';
+import Status2 from './Status2';
 import {Badge} from "@material-ui/core";
 
 
@@ -31,7 +32,7 @@ const ChannelPreview = function ({ channel }) {
                     <Typography component="h5" variant="h5">
                         {channelName}
                     </Typography>
-                    <Status members={channel.members} />
+                    <Status2 members={channel.members} />
                 </CardContent>
                 <div className={{
                     display: 'flex',
